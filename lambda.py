@@ -3,11 +3,14 @@
 GlobalAlphabet = [  chr(955),'a','b','c','d','e','f']
 
 def FindAlphabet(string):
-  result=[]
+  result=[] 
+
+  # Hier vind de functie de gebonden variablen 
   for i in range(len(string)):
     if string[i]=='#':
       result += string[i+1]
   
+  # Hier halen we alles uit de string behalve dus de vrije variablen.
   for i in string:
     found = False
     if (i=='#'):
@@ -24,21 +27,20 @@ def FindAlphabet(string):
     if found==False:
       result += i
   
-  result2 = [chr(955)]
+  result2 = [chr(955)] # Dit is de eerste letter van het alphabet, meestal de lambda
+  
   for i in result:
     result2 += i
 
+  #Het alphabet wat wordt gegeven bestaat dus uit eerst het "lambda" symbol, dan alle 
+  #gebonden variablen en dan alle vrije variablen. 
+  
   return result2
 
   
-
-
-
-
-
-
-
 def Replace(target,goal,data):
+  #Deze functie pakt 
+  
   for i in range(len(data)):
     #print(i)
     if isinstance(data[i],list):
@@ -87,8 +89,6 @@ def Text(data,alphabet):
       elif i>len(scope):
         string += alphabet[i]
     
-  
-  
     return string
 
   return Text2(data,alphabet)
@@ -144,7 +144,7 @@ class LambdaTerm:
           else:
             Index.append(0)
             
-            LambdaCount.append(LambdaCount[Index[Depth]])
+            LambdaCount.append(LambdaCount[Depth-1])
             Temp.append([])
             Temp = Temp[Index[Depth-1]]
             Depth +=1
@@ -205,7 +205,7 @@ class LambdaTerm:
         Replace(i,Free,self.BruijnIndex)
         Free += 1
       
-      print(self.BruijnIndex)
+      #print(self.BruijnIndex)
 
 
     def __str__(self): 
@@ -224,121 +224,260 @@ class LambdaTerm:
       
       return string 
 
-
-
-
-
-
-
-
-
-
     def substitute(self, target, goal):
       Replace(target,goal,self.PreferedAlphabet)
 
+    def getAlphabet(self):
+      out = self.PreferedAlphabet.copy()
+      return out
+
+    def resolveConflict(self):
+      CurrentAlphabet = []
+      
+      for i in range(len(self.PreferedAlphabet)):
+        found = False
+        for j in CurrentAlphabet:
+          if self.PreferedAlphabet[i]==j:
+            found = True
+        if found:
+          j=0
+          while GlobalAlphabet[j] in CurrentAlphabet:
+            j += 1  
+          self.PreferedAlphabet[i]=GlobalAlphabet[j]
+        CurrentAlphabet += self.PreferedAlphabet[i]
+
+    def Treduce(self):
+      while self.reduce()==False:
+        print(self)
+
+      
+
+
     def reduce(self):
         """Beta-reduce."""
-        raise NotImplementedError
+        route = []
+        first = []
+        second = []
+        upper = []
+
+        if FindReduce(self.BruijnIndex,route):
+          #print(route)
+
+          #print(upper)
+          DeepCopy(self.BruijnIndex,upper)
+          #print(upper)
 
 
-class Variable(LambdaTerm):
-    """Represents a variable."""
-    
 
-    def __init__(self, symbol, ): 
-      self.symbol = symbol
-      self.BruijnIndex = [1]
-    
-
-    def __repr__(self): 
-    
-      raise NotImplementedError
-
-    def __str__(self): 
-      return '(' + self.symbol + ')'
-      
-    def substitute(self, newsymbol): 
-      self.symbol = newsymbol
-      
-
-
-class Abstraction(LambdaTerm):
-    """Represents a lambda term of the form (?x.M)."""
-
-    def __init__(self, variable, body): 
-      self.BruijnIndex=[]
-      
-      for i in variable:
-        self.BruijnIndex.append(0)
-      
-      for j in body:
-        found = False
-        FreeVariable = []
-
-
-        for i in range(len(variable)):
-          if variable[i]==j:
-            found = True
-            self.BruijnIndex.append(len(variable)-i)
-
-        for i in range(len(FreeVariable)):
-          if FreeVariable[i]==j:
-            found = True
-            self.BruijnIndex.append(len(variable)+i)
-
-        if found==False:
-          FreeVariable += j
-          self.BruijnIndex.append(len(variable)+len(FreeVariable))
+          for i in range(len(route)-1):
+            #print(upper)
+            upper = upper[i]
           
+          
+          second = upper[route[-1]+1]
+          first = upper[route[-1]]
+          
+          if isinstance(second,int):
+            second = [second]
 
-      
-    def __repr__(self): raise NotImplementedError
+          #print(self.BruijnIndex)
+          #print(first)
+          #print(second)
+        else:
+          #print("Already reduced")
+          return True
+        
 
-    def __str__(self): 
-      string = '('
-      lambdacount = 0
-      for i in self.BruijnIndex:
+        #print(self.BruijnIndex)
 
-        if i==0:
-          string += GlobalAlphabet[i]
-          lambdacount += 1
-          string += GlobalAlphabet[lambdacount]
-          string += '.'
+        Replacable = [] 
+        FindFirstVariable(first.copy(),Replacable)
+        #print("Replacables")
+        #print(Replacable)
+        
 
-        if i>lambdacount:
-          string += GlobalAlphabet[i]
-        elif i>0:
-          string += GlobalAlphabet[lambdacount+1-i]
+        #print(self.BruijnIndex)
 
-      string += ')'
-      return string
-
-    def __call__(self, argument): raise NotImplementedError
-
-
-
-class Application(LambdaTerm):
-    """Represents a lambda term of the form (M N)."""
-
-    def __init__(self, function, argument): raise NotImplementedError
-
-    def __repr__(self): raise NotImplementedError
-
-    def __str__(self): raise NotImplementedError
-
-    def reduce(self): raise NotImplementedError
+        Free = FindNumber(0,first)
+        new = first.copy()
+        #print(new)
+        Replace2(Free,-1,new)
+        #print(new)
 
 
 
-a = Variable('x')
-b = Abstraction('xy','zxyz')
+        Free2 = FindNumber(0,second)
+
+        for i in Replacable:
+          Buffer = second.copy()
+          Replace2(Free2,len(i)-1,Buffer)
+          #print(Buffer)
+          if len(Buffer)==1:
+            Replace3(i,Buffer[0],new)
+          else:
+            Replace3(i,Buffer,new)
+        #print(new)
+
+        new.pop(0)
+        #print(new)
+
+        letter = FindNumber2(0,route,self.BruijnIndex)
+        Free3 = FindNumber(0,self.BruijnIndex) 
+
+
+        upper=self.BruijnIndex
+        for i in range(len(route)-1):
+          #print(upper)
+          upper = upper[i]
+
+        parathesis = True
+        
+        if new[0]!=0:
+          parathesis = False
+        #print(self.BruijnIndex)
+        #print("_______")
+
+        upper.pop(route[-1]+1)
+        upper.pop(route[-1])
+        
+        #if len(upper)>=route[-1]+1:
+        #  parathesis=True
+        #else:
+        #  parathesis=False
+        #upper[route[-1]]=new
+       # print(self.BruijnIndex)
+        #print(new)
+
+        if parathesis:
+          upper.insert(route[-1],new)
+        else:
+          for i in range(len(new)):
+            upper.insert(route[-1]+i,new[i])
+
+        #self.PreferedAlphabet.pop(letter)
+
+        #Replace2(Free3,-1,self.BruijnIndex)
+
+        #print(self.BruijnIndex)
+        return False
+
+
+
+def FindNumber2(target,route,data,depth=0):
+  number = 0 
+  #print(depth)
+  #print(route)
+  #print(len(route))
+
+  if depth>=len(route):
+    return 1 
+
+
+  for i in range(route[depth]-1):
+    #print(i)
+    if isinstance(data[i],list):
+      number += FindNumber(target,data[i])
+    elif data[i]==target:
+      number += 1
+
+  #print(number)    
+  return number + FindNumber2(target,route,data,depth+1)
+
+
+
+
+def DeepCopy(data,target):
+  
+  for i in range(len(data)):
+    #print(target)
+    if isinstance(data[i],list):
+      target.append([])
+      DeepCopy(data[i],target[i])
+    else:
+      target.append(data[i])
+  
+
+def pop(Route,data):
+  temp = data
+  for i in range(len(Route)-1):
+    temp = temp[Route[i]] 
+  temp.pop([Route[-1]])   
+
+def Replace3(Route,Goal,data):
+  temp = data
+  for i in range(len(Route)-1):
+    temp = temp[Route[i]] 
+  temp[Route[-1]]=Goal       
+        
+def Replace2(limit,add,data):
+  #Deze functie pakt 
+  
+  for i in range(len(data)):
+    #print(data[i])
+    if isinstance(data[i],list):
+      Replace2(limit,add,data[i])
+    elif data[i]>limit:
+      data[i] = data[i] + add 
+
+
+
+
+def FindReduce(data,route):
+  #print(route)
+  
+  for i in range(0,len(data)-1):
+    if isinstance(data[i],list):
+      if i<len(data)-1:
+        route.append(i)
+        return True
+      else:
+        route.append(i)
+        if FindReduce(data,route):
+          return True
+        else:
+          route.pop()
+  
+  return False
+
+def FindFirstVariable(first,routes=[],depth=0,scope=[]):
+  
+  
+  #print(routes)
+  #print("Fag")
+
+  for i in range(len(first)):
+    
+    #print(isinstance(i,list))
+    scope.append(i)
+    #print(scope)
+
+    if isinstance(first[i],list):
+      #print("Deepre")
+      FindFirstVariable(first[i],routes,depth,scope)
+
+    else:
+      if first[i]==0:
+        depth += 1
+      #print(first[i])
+      #print(depth)
+      if first[i]==depth:
+        routes.append(scope.copy())
+    
+    scope.pop()
+  
+  return routes
+
+
+
 c = LambdaTerm()
 inp1 = input()
 c.fromstring(inp1)
-print(c)
-c.substitute('u','&')
-print(c)
-
-
-(#x.#y.zx(#u.ux)(#w.wy))
-
+#print(c)
+#print(c.getAlphabet())
+#c.substitute('z','>')
+#print(c)
+#print(c.getAlphabet())
+c.resolveConflict()
+#print(c.getAlphabet())
+#print(c)
+c.Treduce()
