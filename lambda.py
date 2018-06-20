@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-GlobalAlphabet = [  chr(955),'a','b','c','d','e','f']
+GlobalAlphabet = [  chr(955),'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 
 def FindAlphabet(string):
   result=[] 
@@ -107,10 +107,26 @@ class LambdaTerm:
 
 
 
-    def __init__(self):
-      return None
-      
 
+      
+    def __init__(self,data1=None,data2=None):
+      if isinstance(data1,str):
+        self.fromstring(data1)
+      if isinstance(data1,type(self)):
+        self.BruijnIndex = []
+        DeepCopy(data1.BruijnIndex,self.BruijnIndex)
+        self.PreferedAlphabet = data1.PreferedAlphabet.copy()
+
+      if isinstance(data1,list):
+        if isinstance(data2,list):
+          #print(data1)
+          #print(data2)
+          self.BruijnIndex = []
+          DeepCopy(data1,self.BruijnIndex)
+          self.PreferedAlphabet = data2.copy()
+
+
+      return None
 
     def fromstring(self,string):
       self.BruijnIndex= []
@@ -246,14 +262,108 @@ class LambdaTerm:
           self.PreferedAlphabet[i]=GlobalAlphabet[j]
         CurrentAlphabet += self.PreferedAlphabet[i]
 
-    def Treduce(self):
-      while self.reduce()==False:
-        print(self)
-
-      
-
-
     def reduce(self):
+      #print(self.BruijnIndex)
+      while self.reduceStep()==False:
+        #print(self)
+        #print(self.BruijnIndex)
+        None
+
+    def __invert__(self):
+      new = LambdaTerm(self)
+      new.reduce()
+      return new
+
+    def __or__(self,other):
+      #print(self)
+      #print(other)
+      
+      if isinstance(other,type(self)):
+
+        one = []
+        DeepCopy(self.BruijnIndex,one)
+        oneAlphabet = self.PreferedAlphabet.copy()
+
+        two = []
+        DeepCopy(other.BruijnIndex,two)
+        twoAlphabet = other.PreferedAlphabet.copy()
+
+        oneFree = FindNumber(0,one)
+        twoFree = FindNumber(0,two)
+
+        #print(oneAlphabet)
+        #print(twoAlphabet)
+        newAlphabet = oneAlphabet[:oneFree+1].copy()
+        newAlphabet.extend(twoAlphabet[1:twoFree+1])
+        newAlphabet.extend(oneAlphabet[twoFree+1:])
+        newAlphabet.extend(twoAlphabet[twoFree+1:])
+        #print(newAlphabet)
+        
+        for i in range(len(newAlphabet[:oneFree+twoFree+1])):
+          for j in range(len(newAlphabet[i+1:])):
+            
+            if newAlphabet[i]==newAlphabet[j+i+1]:
+              q=0
+              while GlobalAlphabet[q] in newAlphabet:
+                q += 1
+              if j+i+1<(oneFree+twoFree+1):  
+                newAlphabet[j+i+1]=GlobalAlphabet[q]
+              else:
+                newAlphabet[i]=GlobalAlphabet[q]
+        #print(newAlphabet)
+
+        Replace2(oneFree,-1,twoFree,one)
+        
+        new = []
+
+        if one[0]==0:
+          new.append(one)
+        else:
+          new.extend(one)
+
+        #print(one)
+        #print(two)
+        Replace2(twoFree,-1,len(oneAlphabet)-1,two)
+        #print(two)
+
+        if two[0]==0:
+          new.append(two)
+        else:
+          new.extend(two)
+        #print(new)
+  
+        pop = []
+        for i in range(1,len(newAlphabet[oneFree+twoFree+1:])):
+          for j in range(i+1,len(newAlphabet[oneFree+twoFree+1:])+1):
+            #print(newAlphabet[oneFree+twoFree+i])
+
+            if newAlphabet[oneFree+twoFree+i]==newAlphabet[oneFree+twoFree+j]:
+              
+              Replace(j+oneFree+twoFree,i+oneFree+twoFree,new)
+              #Replace2(j+oneFree+twoFree,-1,-1,new)
+              pop += [j+oneFree+twoFree]
+              #print(new)
+
+        pop.reverse()
+        #print(pop)
+        #print(new)
+        #Replace2(4,-1,-1,one)
+        
+        for i in pop:
+          #print(i)
+          newAlphabet.pop(i)
+          Replace2(i,-1,-1,new)
+        
+        #print(new)
+        #print(newAlphabet)
+
+        return LambdaTerm(new,newAlphabet)
+
+    
+      else:
+        raise NotImplementedError  
+
+    def reduceStep(self):
         """Beta-reduce."""
         route = []
         first = []
@@ -299,18 +409,23 @@ class LambdaTerm:
         #print(self.BruijnIndex)
 
         Free = FindNumber(0,first)
+        Free3 = FindNumber(0,self.BruijnIndex)
+
         new = first.copy()
         #print(new)
-        Replace2(Free,-1,new)
+        
+        
+        Replace2(Free,Free3,-1,new)
         #print(new)
 
 
 
         Free2 = FindNumber(0,second)
+        
 
         for i in Replacable:
           Buffer = second.copy()
-          Replace2(Free2,len(i)-1,Buffer)
+          Replace2(Free2,Free3,len(i)-1,Buffer)
           #print(Buffer)
           if len(Buffer)==1:
             Replace3(i,Buffer[0],new)
@@ -409,15 +524,22 @@ def Replace3(Route,Goal,data):
     temp = temp[Route[i]] 
   temp[Route[-1]]=Goal       
         
-def Replace2(limit,add,data):
+def Replace2(lowerlimit,upperlimit,add,data):
   #Deze functie pakt 
   
   for i in range(len(data)):
     #print(data[i])
     if isinstance(data[i],list):
-      Replace2(limit,add,data[i])
-    elif data[i]>limit:
-      data[i] = data[i] + add 
+      Replace2(lowerlimit,upperlimit,add,data[i])
+    else:
+      if upperlimit==-1:
+        if lowerlimit<data[i]:
+          data[i] = data[i] + add
+      else:
+        if lowerlimit<data[i]<upperlimit:
+          data[i] = data[i] + add         
+
+
 
 
 
@@ -469,15 +591,24 @@ def FindFirstVariable(first,routes=[],depth=0,scope=[]):
 
 
 
-c = LambdaTerm()
-inp1 = input()
-c.fromstring(inp1)
-#print(c)
-#print(c.getAlphabet())
-#c.substitute('z','>')
-#print(c)
-#print(c.getAlphabet())
-c.resolveConflict()
-#print(c.getAlphabet())
-#print(c)
-c.Treduce()
+a = LambdaTerm("(#x.xyz))")
+b = LambdaTerm("(#y.yuyz)")
+c = LambdaTerm("((#x.xyz)(#u.uw))")
+e = LambdaTerm("(#x.x)")
+
+
+
+print(a)
+print(b)
+
+print(c)
+print(~c)
+
+
+print(a|b)
+print(~(a|b))
+
+print("-------------")
+print(a|b|c)
+print(~(a|b|c))
+
