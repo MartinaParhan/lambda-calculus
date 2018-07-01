@@ -155,14 +155,19 @@ def Replace2(lowerlimit,upperlimit,add,data):
 def FindReduce(data,route):
   #print(route)
   
-  for i in range(0,len(data)-1):
+  for i in range(0,len(data)):
+    #print(data[i])
+    
     if isinstance(data[i],list):
+      #print(i)
+      #print(len(data))
       if i<len(data)-1:
         route.append(i)
         return True
       else:
         route.append(i)
-        if FindReduce(data,route):
+        if FindReduce(data[i],route):
+          
           return True
         else:
           route.pop()
@@ -533,9 +538,10 @@ class LambdaTerm:
 
           for i in range(len(route)-1):
             #print(upper)
-            upper = upper[i]
+            upper = upper[route[i]]
           
-          
+          #print(upper)
+
           second = upper[route[-1]+1]
           first = upper[route[-1]]
           
@@ -551,9 +557,11 @@ class LambdaTerm:
         
 
         #print(self.BruijnIndex)
+        firstcopy = []
+        DeepCopy(first,firstcopy)
 
         Replacable = [] 
-        FindFirstVariable(first.copy(),Replacable)
+        FindFirstVariable(firstcopy,Replacable)
         #print("Replacables")
         #print(Replacable)
         
@@ -562,7 +570,9 @@ class LambdaTerm:
 
         Free = FindNumber(0,first)
 
-        new = first.copy()
+        new = []
+        DeepCopy(first,new)
+        #first.copy()
         #print(new)
         
         
@@ -575,14 +585,15 @@ class LambdaTerm:
         
 
         for i in Replacable:
-          Buffer = second.copy()
+          Buffer = []
+          DeepCopy(second,Buffer)
           Replace2(Free2,Free3,len(i)-1,Buffer)
           #print(Buffer)
           if len(Buffer)==1:
             Replace3(i,Buffer[0],new)
           else:
             Replace3(i,Buffer,new)
-        #print(new)
+        #rint(new)
 
         new.pop(0)
         #print(new)
@@ -590,10 +601,11 @@ class LambdaTerm:
         letter = FindNumber2(0,route,self.BruijnIndex)
 
 
-        upper=self.BruijnIndex
+        upper= self.BruijnIndex
+        
         for i in range(len(route)-1):
           #print(upper)
-          upper = upper[i]
+          upper = upper[route[i]]
 
         parathesis = True
         
@@ -601,10 +613,17 @@ class LambdaTerm:
           parathesis = False
         #print(self.BruijnIndex)
         #print("_______")
+        
+
+
 
         upper.pop(route[-1]+1)
         upper.pop(route[-1])
         
+        if len(upper)==0:
+          parathesis=False
+
+
         #if len(upper)>=route[-1]+1:
         #  parathesis=True
         #else:
