@@ -1,6 +1,8 @@
 
 
-GlobalAlphabet = [  chr(955),'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+GlobalAlphabet = [  chr(955),'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+
+
 
 def FindAlphabet(string):
   result=[] 
@@ -393,9 +395,9 @@ class LambdaTerm:
       stop=0
       while self.reduceStep()==False:
         stop += 1
-        if stop>20:
+        if stop>2000:
           break
-        #print(self)
+        #print(stop)
         #print(self.BruijnIndex)
         None
 
@@ -575,8 +577,8 @@ class LambdaTerm:
         #first.copy()
         #print(new)
         
-        
-        Replace2(Free,Free3,-1,new)
+        #print(Free3)
+        Replace2(Free,Free3+1,-1,new)
         #print(new)
 
 
@@ -587,8 +589,12 @@ class LambdaTerm:
         for i in Replacable:
           Buffer = []
           DeepCopy(second,Buffer)
-          Replace2(Free2,Free3,len(i)-1,Buffer)
           #print(Buffer)
+          #print(Free2)
+          #print(Free3)
+          Replace2(Free2,Free3,len(i)-1,Buffer)
+          
+          
           if len(Buffer)==1:
             Replace3(i,Buffer[0],new)
           else:
@@ -607,10 +613,18 @@ class LambdaTerm:
           #print(upper)
           upper = upper[route[i]]
 
+
+        if len(new)==1:
+          if isinstance(new[0],list):
+            new = new[0]
+
+
         parathesis = True
         
         if new[0]!=0:
           parathesis = False
+
+
         #print(self.BruijnIndex)
         #print("_______")
         
@@ -642,7 +656,7 @@ class LambdaTerm:
 
         #Replace2(Free3,-1,self.BruijnIndex)
         Free4 = FindNumber(0,self.BruijnIndex)
-        #print(Free4)
+        #print(Free4-Free3)
 
         if Free4>Free3:
           for i in range(Free4-Free3):
@@ -651,7 +665,9 @@ class LambdaTerm:
               q += 1
             self.PreferedAlphabet.insert(Free3+i+1,GlobalAlphabet[q])
             Replace2(Free3+i,-1,1,self.BruijnIndex)
-
+        elif Free3>Free4:
+          for i in range(0,Free3-Free4):
+            self.PreferedAlphabet.pop(Free3-i)
 
 
 
