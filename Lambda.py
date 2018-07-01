@@ -492,7 +492,7 @@ class LambdaTerm:
         #print(new)
         #print(newAlphabet)
 
-        return LambdaTerm(new,newAlphabet)
+        return ~LambdaTerm(new,newAlphabet)
 
     
       else:
@@ -604,7 +604,7 @@ class LambdaTerm:
         new.pop(0)
         #print(new)
 
-        letter = FindNumber2(0,route,self.BruijnIndex)
+        #letter = FindNumber2(0,route,self.BruijnIndex)
 
 
         upper= self.BruijnIndex
