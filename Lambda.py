@@ -176,6 +176,36 @@ def FindReduce(data,route):
   
   return False
 
+def FindReduce2(data,route):
+  #print(route)
+  
+  for i in range(0,len(data)):
+    #print(data[i])
+    
+    if isinstance(data[i],list):
+      #print(i)
+      #print(len(data))
+      if i<len(data)-1:
+        if isinstance(data[i+1],int):
+          route.append(i)
+          return True
+        else:
+          route.append(i)
+          if FindReduce2(data[i],route):
+            return True
+          else:
+            route.pop()
+      else:
+        route.append(i)
+        if FindReduce2(data[i],route):
+          
+          return True
+        else:
+          route.pop()
+  
+  return False
+
+
 def FindFirstVariable(first,routes=[],depth=0,scope=[]):
   
   
@@ -392,14 +422,16 @@ class LambdaTerm:
 
     def reduce(self):
       #print(self.BruijnIndex)
+      print(self)
       stop=0
       while self.reduceStep()==False:
         stop += 1
         if stop>2000:
           break
-        #print(stop)
+        print(self)
         #print(self.BruijnIndex)
         None
+      print("______")
 
     def __invert__(self):
       new = LambdaTerm(self)
@@ -529,20 +561,11 @@ class LambdaTerm:
         #print(self.PreferedAlphabet)
 
         #print(Free3)
-        if FindReduce(self.BruijnIndex,route):
+        if FindReduce2(self.BruijnIndex,route):
           #print(route)
-
-          #print(upper)
           DeepCopy(self.BruijnIndex,upper)
-          #print(upper)
-
-
-
           for i in range(len(route)-1):
-            #print(upper)
             upper = upper[route[i]]
-          
-          #print(upper)
 
           second = upper[route[-1]+1]
           first = upper[route[-1]]
@@ -550,9 +573,16 @@ class LambdaTerm:
           if isinstance(second,int):
             second = [second]
 
-          #print(self.BruijnIndex)
-          #print(first)
-          #print(second)
+        elif FindReduce(self.BruijnIndex,route):
+          DeepCopy(self.BruijnIndex,upper)
+          for i in range(len(route)-1):
+            upper = upper[route[i]]
+
+          second = upper[route[-1]+1]
+          first = upper[route[-1]]
+          
+          if isinstance(second,int):
+            second = [second]
         else:
           #print("Already reduced")
           return True
