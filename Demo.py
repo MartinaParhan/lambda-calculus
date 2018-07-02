@@ -1,12 +1,6 @@
-#!/usr/bin/env python3
-
-
-
 import Lambda
 
 LT = Lambda.LambdaTerm
-
-"""De beginvariabele die 0 representeert"""
 
 def Int2Church(n):
     """n is een int
@@ -18,6 +12,15 @@ def Int2Church(n):
       a.BruijnIndex[1].insert(1,2)
 
     return a
+
+def Church2Int(n):
+    """Zet een Church Numeral om in een int"""
+    res = 0
+    i = 1
+    while n.BruijnIndex[1][i]==2:
+        res+=1
+        i+=1
+    return res
 
 zero = LT("(#f.(#x.x))")
 succ = LT("(#f.(#x.(#n.xfxn))")
