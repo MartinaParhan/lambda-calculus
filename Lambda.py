@@ -1,5 +1,3 @@
-
-
 GlobalAlphabet = [  chr(955),'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 
 
@@ -7,12 +5,12 @@ GlobalAlphabet = [  chr(955),'a','b','c','d','e','f','g','h','i','j','k','l','m'
 def FindAlphabet(string):
   result=[] 
 
-  # Hier vind de functie de gebonden variablen 
+  # Hier vind de functie de gebonden variabelen 
   for i in range(len(string)):
     if string[i]=='#':
       result += string[i+1]
   
-  # Hier halen we alles uit de string behalve dus de vrije variablen.
+  # Hier halen we alles uit de string behalve dus de vrije variabelen.
   for i in string:
     found = False
     if (i=='#'):
@@ -29,21 +27,20 @@ def FindAlphabet(string):
     if found==False:
       result += i
   
-  result2 = [chr(955)] # Dit is de eerste letter van het alphabet, meestal de lambda
+  result2 = [chr(955)] # Dit is de eerste letter van het alfabet, meestal de lambda
   
   for i in result:
     result2 += i
 
-  #Het alphabet wat wordt gegeven bestaat dus uit eerst het "lambda" symbol, dan alle 
-  #gebonden variablen en dan alle vrije variablen. 
+  #Het alfabet wat wordt gegeven bestaat dus uit eerst het "lambda" symbol, dan alle 
+  #gebonden variabelen en dan alle vrije variabelen. 
   
   return result2
 
 def Replace(target,goal,data):
-  #Deze functie pakt 
+  #Deze functie zoekt in de data naar de int target en vervangt hem door goal
   
   for i in range(len(data)):
-    #print(i)
     if isinstance(data[i],list):
       Replace(target,goal,data[i])
     elif data[i]==target:
@@ -52,7 +49,6 @@ def Replace(target,goal,data):
 def FindNumber(target,data):
   number = 0 
   for i in data:
-    #print(i)
     if isinstance(i,list):
       number += FindNumber(target,i)
     elif i==target:
@@ -60,22 +56,15 @@ def FindNumber(target,data):
   return number
 
 def Text(data,alphabet):
-  #print(data)
-  #print("printing")
   global lambdaC 
   lambdaC = 1
 
   def Text2(data,alphabet,scope=[]):
     string = ''
     global lambdaC 
-    #print(data)
 
 
     for i in data:
-      #print(i)
-
-      #print(scope)
-      #print(lambdaC)
       scope2=scope.copy()
 
       if isinstance(i,list):
@@ -99,28 +88,22 @@ def Text(data,alphabet):
 
 def FindNumber2(target,route,data,depth=0):
   number = 0 
-  #print(depth)
-  #print(route)
-  #print(len(route))
 
   if depth>=len(route):
     return 1 
 
 
   for i in range(route[depth]-1):
-    #print(i)
     if isinstance(data[i],list):
       number += FindNumber(target,data[i])
     elif data[i]==target:
       number += 1
 
-  #print(number)    
   return number + FindNumber2(target,route,data,depth+1)
   
 def DeepCopy(data,target):
-  
+  #Deze functie maakt een kopie van de data in target
   for i in range(len(data)):
-    #print(target)
     if isinstance(data[i],list):
       target.append([])
       DeepCopy(data[i],target[i])
@@ -143,7 +126,6 @@ def Replace2(lowerlimit,upperlimit,add,data):
   #Deze functie pakt 
   
   for i in range(len(data)):
-    #print(data[i])
     if isinstance(data[i],list):
       Replace2(lowerlimit,upperlimit,add,data[i])
     else:
@@ -155,14 +137,10 @@ def Replace2(lowerlimit,upperlimit,add,data):
           data[i] = data[i] + add         
 
 def FindReduce(data,route):
-  #print(route)
   
   for i in range(0,len(data)):
-    #print(data[i])
     
     if isinstance(data[i],list):
-      #print(i)
-      #print(len(data))
       if i<len(data)-1:
         route.append(i)
         return True
@@ -177,14 +155,10 @@ def FindReduce(data,route):
   return False
 
 def FindReduce2(data,route):
-  #print(route)
   
   for i in range(0,len(data)):
-    #print(data[i])
     
     if isinstance(data[i],list):
-      #print(i)
-      #print(len(data))
       if i<len(data)-1:
         if isinstance(data[i+1],int):
           route.append(i)
@@ -209,24 +183,16 @@ def FindReduce2(data,route):
 def FindFirstVariable(first,routes=[],depth=0,scope=[]):
   
   
-  #print(routes)
-  #print("Fag")
-
   for i in range(len(first)):
     
-    #print(isinstance(i,list))
     scope.append(i)
-    #print(scope)
 
     if isinstance(first[i],list):
-      #print("Deepre")
       FindFirstVariable(first[i],routes,depth,scope)
 
     else:
       if first[i]==0:
         depth += 1
-      #print(first[i])
-      #print(depth)
       if first[i]==depth:
         routes.append(scope.copy())
     
@@ -236,12 +202,8 @@ def FindFirstVariable(first,routes=[],depth=0,scope=[]):
 
 def DeepCompare(data1,data2):
   Same = True
-  #print(data1)
-  #print(data2)
   if len(data1)==len(data2):
     for i in range(len(data1)):
-      #print(data1[i])
-      #print(data2[i])
       if isinstance(data1[i],list):
         if isinstance(data2[i],list):
           Same = DeepCompare(data1[i],data2[i])
@@ -254,8 +216,6 @@ def DeepCompare(data1,data2):
           return False
   else:
     return False
-  #print("Made it")
-  #print(Same)
   return Same        
 
 
@@ -276,8 +236,6 @@ class LambdaTerm:
 
       if isinstance(data1,list):
         if isinstance(data2,list):
-          #print(data1)
-          #print(data2)
           self.BruijnIndex = []
           DeepCopy(data1,self.BruijnIndex)
           self.PreferedAlphabet = data2.copy()
@@ -299,15 +257,6 @@ class LambdaTerm:
       
       i = 0
       while i<len(string):
-        #print(string[i])
-        #print(Depth)
-        #print(Temp)
-        #print(Index)
-        #print(self.BruijnIndex)
-        #print(BoundVariables)
-        #print(FreeVariable)
-        #print(LambdaCount)
-
 
         if string[i]=='(':
           if Depth==0:
@@ -329,9 +278,6 @@ class LambdaTerm:
             Index.pop(-1)
             Index[Depth-2] += 1
             Temp = self.BruijnIndex
-            
-            #print(Index)
-            #print(Depth)
             
             for k in range(Depth-2):
               Temp = Temp[Index[k]]
@@ -377,13 +323,8 @@ class LambdaTerm:
       for i in FreeVariable:
         Replace(i,Free,self.BruijnIndex)
         Free += 1
-      
-      #print(self.BruijnIndex)
-      #print(self.PreferedAlphabet)
 
     def __str__(self): 
-      #print("printing")
-      #print(self.BruijnIndex)
 
       string = '('
       if self.PreferedAlphabet==None:
@@ -391,11 +332,8 @@ class LambdaTerm:
       else:
         string += Text(self.BruijnIndex,self.PreferedAlphabet)
       
-      
-      
       string += ')'
 
-      
       return string 
 
     def __call__(self, target, goal):
@@ -421,7 +359,6 @@ class LambdaTerm:
         CurrentAlphabet += self.PreferedAlphabet[i]
 
     def reduce(self):
-      #print(self.BruijnIndex)
       print(self)
       stop=0
       while self.reduceStep()==False:
@@ -429,7 +366,6 @@ class LambdaTerm:
         if stop>2000:
           break
         print(self)
-        #print(self.BruijnIndex)
         None
       print("______")
 
@@ -439,8 +375,6 @@ class LambdaTerm:
       return new
 
     def __or__(self,other):
-      #print(self)
-      #print(other)
       
       if isinstance(other,type(self)):
 
@@ -455,16 +389,10 @@ class LambdaTerm:
         oneFree = FindNumber(0,one)
         twoFree = FindNumber(0,two)
 
-        #print(oneAlphabet)
-        #print(twoAlphabet)
         newAlphabet = oneAlphabet[:oneFree+1].copy()
-        #print(newAlphabet)
         newAlphabet.extend(twoAlphabet[1:twoFree+1])
-        #print(newAlphabet)
         newAlphabet.extend(oneAlphabet[oneFree+1:])
-        #print(newAlphabet)
         newAlphabet.extend(twoAlphabet[twoFree+1:])
-        #print(newAlphabet)
         
         for i in range(len(newAlphabet[:oneFree+twoFree+1])):
           for j in range(len(newAlphabet[i+1:])):
@@ -477,8 +405,7 @@ class LambdaTerm:
                 newAlphabet[j+i+1]=GlobalAlphabet[q]
               else:
                 newAlphabet[i]=GlobalAlphabet[q]
-        #print(newAlphabet)
-
+        
         Replace2(oneFree,-1,twoFree,one)
         
         new = []
@@ -488,55 +415,36 @@ class LambdaTerm:
         else:
           new.extend(one)
 
-        #print(one)
-        #print(two)
         Replace2(twoFree,-1,len(oneAlphabet)-1,two)
-        #print(two)
-
+        
         if two[0]==0:
           new.append(two)
         else:
           new.extend(two)
-        #print(new)
   
         pop = []
         for i in range(1,len(newAlphabet[oneFree+twoFree+1:])):
           for j in range(i+1,len(newAlphabet[oneFree+twoFree+1:])+1):
-            #print(newAlphabet[oneFree+twoFree+i])
-
             if newAlphabet[oneFree+twoFree+i]==newAlphabet[oneFree+twoFree+j]:
               
               Replace(j+oneFree+twoFree,i+oneFree+twoFree,new)
-              #Replace2(j+oneFree+twoFree,-1,-1,new)
               pop += [j+oneFree+twoFree]
-              #print(new)
 
         pop.reverse()
-        #print(pop)
-        #print(new)
-        #Replace2(4,-1,-1,one)
         
         for i in pop:
-          #print(i)
           newAlphabet.pop(i)
           Replace2(i,-1,-1,new)
-        
-        #print(new)
-        #print(newAlphabet)
 
         return ~LambdaTerm(new,newAlphabet)
-
     
       else:
         raise NotImplementedError  
 
     def __eq__(self,other):
       if isinstance(other,type(self)):
-        #print(DeepCompare(self.BruijnIndex,other.BruijnIndex))
         if DeepCompare(self.BruijnIndex,other.BruijnIndex):
           Free = FindNumber(0,self.BruijnIndex)
-          #print(self.PreferedAlphabet[Free+1:])
-          #print(other.PreferedAlphabet[Free+1:])
           for i in range(len(self.PreferedAlphabet[Free+1:])):
             if self.PreferedAlphabet[Free+1+i]!=other.PreferedAlphabet[Free+1+i]:
               return False
@@ -557,12 +465,7 @@ class LambdaTerm:
         upper = []
         Free3 = FindNumber(0,self.BruijnIndex)
 
-        #print(self.BruijnIndex)
-        #print(self.PreferedAlphabet)
-
-        #print(Free3)
         if FindReduce2(self.BruijnIndex,route):
-          #print(route)
           DeepCopy(self.BruijnIndex,upper)
           for i in range(len(route)-1):
             upper = upper[route[i]]
@@ -584,44 +487,26 @@ class LambdaTerm:
           if isinstance(second,int):
             second = [second]
         else:
-          #print("Already reduced")
           return True
         
 
-        #print(self.BruijnIndex)
         firstcopy = []
         DeepCopy(first,firstcopy)
 
         Replacable = [] 
         FindFirstVariable(firstcopy,Replacable)
-        #print("Replacables")
-        #print(Replacable)
-        
-
-        #print(self.BruijnIndex)
 
         Free = FindNumber(0,first)
 
         new = []
         DeepCopy(first,new)
-        #first.copy()
-        #print(new)
-        
-        #print(Free3)
         Replace2(Free,Free3+1,-1,new)
-        #print(new)
-
-
 
         Free2 = FindNumber(0,second)
-        
 
         for i in Replacable:
           Buffer = []
           DeepCopy(second,Buffer)
-          #print(Buffer)
-          #print(Free2)
-          #print(Free3)
           Replace2(Free2,Free3,len(i)-1,Buffer)
           
           
@@ -629,37 +514,22 @@ class LambdaTerm:
             Replace3(i,Buffer[0],new)
           else:
             Replace3(i,Buffer,new)
-        #rint(new)
 
         new.pop(0)
-        #print(new)
-
-        #letter = FindNumber2(0,route,self.BruijnIndex)
-
 
         upper= self.BruijnIndex
         
         for i in range(len(route)-1):
-          #print(upper)
           upper = upper[route[i]]
-
 
         if len(new)==1:
           if isinstance(new[0],list):
             new = new[0]
 
-
         parathesis = True
         
         if new[0]!=0:
           parathesis = False
-
-
-        #print(self.BruijnIndex)
-        #print("_______")
-        
-
-
 
         upper.pop(route[-1]+1)
         upper.pop(route[-1])
@@ -668,26 +538,14 @@ class LambdaTerm:
           parathesis=False
 
 
-        #if len(upper)>=route[-1]+1:
-        #  parathesis=True
-        #else:
-        #  parathesis=False
-        #upper[route[-1]]=new
-       # print(self.BruijnIndex)
-        #print(new)
-
         if parathesis:
           upper.insert(route[-1],new)
         else:
           for i in range(len(new)):
             upper.insert(route[-1]+i,new[i])
 
-        #self.PreferedAlphabet.pop(letter)
-
-        #Replace2(Free3,-1,self.BruijnIndex)
         Free4 = FindNumber(0,self.BruijnIndex)
-        #print(Free4-Free3)
-
+        
         if Free4>Free3:
           for i in range(Free4-Free3):
             q=0
@@ -699,10 +557,4 @@ class LambdaTerm:
           for i in range(0,Free3-Free4):
             self.PreferedAlphabet.pop(Free3-i)
 
-
-
-        #print(self.BruijnIndex)
-        #print(self.PreferedAlphabet)
         return False
-
-
