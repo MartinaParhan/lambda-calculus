@@ -47,6 +47,7 @@ def Replace(target,goal,data):
       data[i] = goal
 
 def FindNumber(target,data):
+    #Telt het aantal keer dat target voorkomt in data
   number = 0 
   for i in data:
     if isinstance(i,list):
@@ -60,6 +61,7 @@ def Text(data,alphabet):
   lambdaC = 1
 
   def Text2(data,alphabet,scope=[]):
+    #Zet een BruijnIndex om in een string
     string = ''
     global lambdaC 
 
@@ -87,6 +89,7 @@ def Text(data,alphabet):
   return Text2(data,alphabet)
 
 def FindNumber2(target,route,data,depth=0):
+    #Vind het aantal verschijningen van target op een bepaalde diepte depth
   number = 0 
 
   if depth>=len(route):
@@ -111,19 +114,21 @@ def DeepCopy(data,target):
       target.append(data[i])
   
 def pop(Route,data):
+    #Verwijdert route uit data
   temp = data
   for i in range(len(Route)-1):
     temp = temp[Route[i]] 
   temp.pop([Route[-1]])   
 
 def Replace3(Route,Goal,data):
+    #Verwisselt de deellijst route voor goal in data
   temp = data
   for i in range(len(Route)-1):
     temp = temp[Route[i]] 
   temp[Route[-1]]=Goal       
         
 def Replace2(lowerlimit,upperlimit,add,data):
-  #Deze functie pakt 
+  #Deze functie verhoogt alle waarden tussen upperlimit en lowerlimit met add
   
   for i in range(len(data)):
     if isinstance(data[i],list):
@@ -137,7 +142,8 @@ def Replace2(lowerlimit,upperlimit,add,data):
           data[i] = data[i] + add         
 
 def FindReduce(data,route):
-  
+    #Deze functie zoekt een 'route' om de data over te reduceren.
+    #Dit houdt in de manier waarop we de data gaan reduceren 
   for i in range(0,len(data)):
     
     if isinstance(data[i],list):
@@ -155,7 +161,7 @@ def FindReduce(data,route):
   return False
 
 def FindReduce2(data,route):
-  
+  #Deze functie zoekt een reductiepunt en geeft True terug als hij bestaat.
   for i in range(0,len(data)):
     
     if isinstance(data[i],list):
@@ -181,7 +187,7 @@ def FindReduce2(data,route):
 
 
 def FindFirstVariable(first,routes=[],depth=0,scope=[]):
-  
+  #Vind de eerste variabele voor onze Beta-reductie
   
   for i in range(len(first)):
     
@@ -201,6 +207,7 @@ def FindFirstVariable(first,routes=[],depth=0,scope=[]):
   return routes
 
 def DeepCompare(data1,data2):
+    #Bekijkt of twee lijsten hetzelfde zijn, deze lijsten mogen ook deellijsten hebben
   Same = True
   if len(data1)==len(data2):
     for i in range(len(data1)):
@@ -244,6 +251,7 @@ class LambdaTerm:
       return None
 
     def fromstring(self,string):
+        #Zet een string om in een lambdaterm
       self.BruijnIndex= []
 
       self.PreferedAlphabet = FindAlphabet(string)
@@ -257,7 +265,9 @@ class LambdaTerm:
       
       i = 0
       while i<len(string):
-
+        #Als we een openend haakje tegenkomen, dan bekijken we
+        #de diepte en voegen we data toe aan onze variabelen
+        #(inclusief de verhoging van de diepte)
         if string[i]=='(':
           if Depth==0:
             Index.append(0)
@@ -270,10 +280,12 @@ class LambdaTerm:
             Temp.append([])
             Temp = Temp[Index[Depth-1]]
             Depth +=1
-
+        #Als we een sluitend haakje tegenkomen en de diepte is 1,
+        #dan stopt de while-loop
         elif string[i]==')':
           if Depth==1:
             i=10000
+        #Anders gaan we een diepte omlaag en voegen we weer aan onze variabelen toe
           else:
             Index.pop(-1)
             Index[Depth-2] += 1
@@ -287,7 +299,7 @@ class LambdaTerm:
 
             LambdaCount.pop()
             Depth -=1
-
+        #Als we een hekje(=lambda) tegenkomen, dan updaten we onze variabelen
         elif string[i]=='#':
           Temp.append(0)
           BoundVariables.append(string[i+1])
@@ -296,6 +308,7 @@ class LambdaTerm:
           Index[Depth-1] += 1
           LambdaCount[Depth-1] += 1
 
+        
         else:
           found = False
           
@@ -317,7 +330,9 @@ class LambdaTerm:
             Index[Depth-1] += 1
                   
         i += 1
-      
+
+    #Hier bepalen we het aantal lambda's en bepalen we de Bruijnindex van
+    #de vrije variabele
       self.LambdaTotal = FindNumber(0,self.BruijnIndex)
       Free = self.LambdaTotal+1
       for i in FreeVariable:
@@ -337,6 +352,7 @@ class LambdaTerm:
       return string 
 
     def __call__(self, target, goal):
+        #De __call__ functie wordt gebruikt voor alfa-substitutie
       Replace(target,goal,self.PreferedAlphabet)
 
     def getAlphabet(self):
@@ -344,6 +360,7 @@ class LambdaTerm:
       return out
 
     def resolveConflict(self):
+        #Deze functie lost botsende symbolen op
       CurrentAlphabet = []
       
       for i in range(len(self.PreferedAlphabet)):
@@ -359,6 +376,7 @@ class LambdaTerm:
         CurrentAlphabet += self.PreferedAlphabet[i]
 
     def reduce(self):
+        #Deze functie doet de beta-reductie met behulp van de reduceStep-methode
       print(self)
       stop=0
       while self.reduceStep()==False:
@@ -375,9 +393,10 @@ class LambdaTerm:
       return new
 
     def __or__(self,other):
-      
+        #Dit is de combinatiefunctie
       if isinstance(other,type(self)):
 
+        #We kopieren alle data
         one = []
         DeepCopy(self.BruijnIndex,one)
         oneAlphabet = self.PreferedAlphabet.copy()
@@ -386,9 +405,10 @@ class LambdaTerm:
         DeepCopy(other.BruijnIndex,two)
         twoAlphabet = other.PreferedAlphabet.copy()
 
-        oneFree = FindNumber(0,one)
-        twoFree = FindNumber(0,two)
+        oneFree = FindNumber(0,one)#aantal vrije variabelen in one
+        twoFree = FindNumber(0,two)#aantal vrije variabelen in two
 
+        #Hier worden de alfabetten gecombineerd
         newAlphabet = oneAlphabet[:oneFree+1].copy()
         newAlphabet.extend(twoAlphabet[1:twoFree+1])
         newAlphabet.extend(oneAlphabet[oneFree+1:])
@@ -407,9 +427,8 @@ class LambdaTerm:
                 newAlphabet[i]=GlobalAlphabet[q]
         
         Replace2(oneFree,-1,twoFree,one)
-        
+        #Hier worden de twee indexen gecombineerd
         new = []
-
         if one[0]==0:
           new.append(one)
         else:
@@ -421,7 +440,8 @@ class LambdaTerm:
           new.append(two)
         else:
           new.extend(two)
-  
+
+      #Hier worden dubbele variabelen opgelost
         pop = []
         for i in range(1,len(newAlphabet[oneFree+twoFree+1:])):
           for j in range(i+1,len(newAlphabet[oneFree+twoFree+1:])+1):
@@ -458,13 +478,14 @@ class LambdaTerm:
 
 
     def reduceStep(self):
-        """Beta-reduce."""
+        #Hier wordt de een stap van de beta-reductie gedaan.
         route = []
         first = []
         second = []
         upper = []
         Free3 = FindNumber(0,self.BruijnIndex)
 
+        #Indien er een manier is om te reduceren, vul wat variabelen in.
         if FindReduce2(self.BruijnIndex,route):
           DeepCopy(self.BruijnIndex,upper)
           for i in range(len(route)-1):
@@ -488,11 +509,11 @@ class LambdaTerm:
             second = [second]
         else:
           return True
-        
 
+        #Kijk welke variabelen in de reductie naar de eerste lambda verwijzen en
+        #zet deze in Replacable 
         firstcopy = []
         DeepCopy(first,firstcopy)
-
         Replacable = [] 
         FindFirstVariable(firstcopy,Replacable)
 
@@ -504,6 +525,7 @@ class LambdaTerm:
 
         Free2 = FindNumber(0,second)
 
+        #Zoek in de tweede term naar vervangingsplekken en vervang ze
         for i in Replacable:
           Buffer = []
           DeepCopy(second,Buffer)
@@ -525,7 +547,7 @@ class LambdaTerm:
         if len(new)==1:
           if isinstance(new[0],list):
             new = new[0]
-
+        
         parathesis = True
         
         if new[0]!=0:
@@ -537,13 +559,14 @@ class LambdaTerm:
         if len(upper)==0:
           parathesis=False
 
-
+        #Corrigeer de vrije variabelen met het originele aantal lambda's
         if parathesis:
           upper.insert(route[-1],new)
         else:
           for i in range(len(new)):
             upper.insert(route[-1]+i,new[i])
-
+            
+        #Hier passen we het alfabet aan voor de Beta-reductie
         Free4 = FindNumber(0,self.BruijnIndex)
         
         if Free4>Free3:

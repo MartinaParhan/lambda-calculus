@@ -1,5 +1,4 @@
 import Lambda
-
 LT = Lambda.LambdaTerm
 
 def Int2Church(n):
@@ -22,10 +21,11 @@ def Church2Int(n):
         i+=1
     return res
 
-zero = LT("(#f.(#x.x))")
-succ = LT("(#f.(#x.(#n.xfxn))")
-add = LT("(#n.(#m.(#f.(#x.mfnfx)))))")
-mul = LT("(#n.(#m.(#f.(#x.nmfx)))))")
+zero = LT("(#f.(#x.x))") #Church Numeral 0
+succ = LT("(#f.(#x.(#n.xfxn))") #De successor functie
+add = LT("(#n.(#m.(#f.(#x.mfnfx)))))") #Optellen van n en m
+mul = LT("(#n.(#m.(#f.(#x.nmfx)))))") #Vermenigvuldigen van n en m 
+
 b = Int2Church(5)
 c = Int2Church(1)
 print(b)
@@ -34,4 +34,3 @@ d = add|b|c
 print(d)
 e = mul|b|c
 print(e)
-print(Int2Church(25))
